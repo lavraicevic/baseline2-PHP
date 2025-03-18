@@ -1,20 +1,44 @@
 <?php
+
+$dbhost = "localhost";
+$dbuser = "root"; // Ako koristiš XAMPP, root nema šifru
+$dbpass = "";
+$dbname = "baseline2";
+
+try {
+    $conn = new PDO("mysql:host=" . $dbhost . ";dbname=" . $dbname , $dbuser, $dbpass);
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+}  catch (PDOException $e) {
+    echo "Error: " . $e->getMessage();
+}
+
 date_default_timezone_set('Europe/Belgrade');
 $name_error = '';
 $date_error = '';
 if($_SERVER['REQUEST_METHOD'] === 'POST'){
+    $not_done = false;
     $title = $_POST["title"];
-    if(strlen($title) < 3){
-        $name_error = 'Not enough letters';
-    }else{
-        $name_error = '';
-    }
+    $description = $_POST["description"];
     $date = $_POST["due_date"];
     $time = strtotime($date);
+
+    // Check if has letters in title
+    if(strlen($title) < 3){
+        $name_error = 'Not enough letters';
+        $not_done = true;
+    }else{
+        $name_error = '';
+        $not_done = false;
+    }
+
+    // Check if the date is in future
     if($time < time()){
         $date_error = 'Please use dates in the future';
+        $not_done = true;
     }else{
         $date_error = '';
+        $not_done = false;
     }
     
 }
@@ -65,11 +89,13 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
             <!-- Output -->
 
         <ul class="w-[320px]">
-            <li class="text-zinc-200">
-                <h2 class="font-semibold text-xl mb-1">Take the dog out</h2>
-                <p class="text-neutral-200 text-sm">Go with Dona throught the park, take her to meet the other dogs and to mark teretories. Be carefull about the other more aggresive dogs</p>
-                <button class="mt-3 px-4 py-1 border-2 border-red-600 text-red-600 transition-linear duration-300 hover:bg-red-600 hover:text-black hover:border-red-600">Delete</button>
-            </li>
+            <?php if($_SERVER['REQUEST_METHOD'] === 'POST') : ?>
+                <li class="text-zinc-200">
+                    <h2 class="font-semibold text-xl mb-1">Take the dog out</h2>
+                    <p class="text-neutral-200 text-sm">Go with Dona throught the park, take her to meet the other dogs and to mark teretories. Be carefull about the other more aggresive dogs</p>
+                    <button class="mt-3 px-4 py-1 border-2 border-red-600 text-red-600 transition-linear duration-300 hover:bg-red-600 hover:text-black hover:border-red-600">Delete</button>
+                </li>
+            <?php endif;?>
         </ul>
 
     </div>
