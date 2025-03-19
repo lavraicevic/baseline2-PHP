@@ -1,13 +1,23 @@
 <?php
 
+// DATABASE connection
 $dbhost = "localhost";
-$dbuser = "root"; // Ako koristiš XAMPP, root nema šifru
+$dbuser = "root";
 $dbpass = "";
 $dbname = "baseline2";
 
 try {
     $conn = new PDO("mysql:host=" . $dbhost . ";dbname=" . $dbname , $dbuser, $dbpass);
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+    if($_SERVER['REQUEST_METHOD'] === 'POST'){
+
+        $title = trim($_POST["title"]);
+        $description = trim($_POST["description"]);
+        $date = ($_POST["due_date"]);
+
+        
+    }
 
 }  catch (PDOException $e) {
     echo "Error: " . $e->getMessage();
@@ -16,32 +26,6 @@ try {
 date_default_timezone_set('Europe/Belgrade');
 $name_error = '';
 $date_error = '';
-if($_SERVER['REQUEST_METHOD'] === 'POST'){
-    $not_done = false;
-    $title = $_POST["title"];
-    $description = $_POST["description"];
-    $date = $_POST["due_date"];
-    $time = strtotime($date);
-
-    // Check if has letters in title
-    if(strlen($title) < 3){
-        $name_error = 'Not enough letters';
-        $not_done = true;
-    }else{
-        $name_error = '';
-        $not_done = false;
-    }
-
-    // Check if the date is in future
-    if($time < time()){
-        $date_error = 'Please use dates in the future';
-        $not_done = true;
-    }else{
-        $date_error = '';
-        $not_done = false;
-    }
-    
-}
 ?>
 
 <!DOCTYPE html>
@@ -66,11 +50,11 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
 
     <div class="mt-8 w-1/2 mx-auto flex justify-center gap-10">
 
-        <form method="POST" class="flex flex-col gap-2 w-[320px]">
+        <form onsubmit="return validateForm()" method="POST" class="flex flex-col gap-2 w-[320px]" name="todoForm">
 
             <label class="text-slate-200">Name : 
                 <input class="border-2 border-slate-200 rounded-lg pl-1" type="text" name="title" id="">
-                <p class="text-red-600"><?= $name_error ?></p>
+                <p class="text-red-600" id="nameError"></p>
             </label>
 
             <label class="text-slate-200">Description: <br>
@@ -80,7 +64,7 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
 
             <label class="text-slate-200">Due date: 
                 <input class="border-2 border-slate-200 rounded-lg pl-1" type="date" name="due_date" id="">
-                <p class="text-red-600"><?= $date_error ?></p>
+                <p class="text-red-600" id="dateError"></p>
             </label>
 
             <input class=" mt-2 border-2 border-slate-200 rounded-lg flex justify-center items-center text-zinc-200 w-30 transition-linear duration-300 hover:bg-zinc-200 hover:text-black " type="submit" value="Add to do">
@@ -88,20 +72,22 @@ if($_SERVER['REQUEST_METHOD'] === 'POST'){
 
             <!-- Output -->
 
-        <ul class="w-[320px]">
-            <?php if($_SERVER['REQUEST_METHOD'] === 'POST') : ?>
-                <li class="text-zinc-200">
+        <ul class="w-[320px]">    
+            <li class="text-zinc-200">
+                <div class="flex justify-between items-center">
                     <h2 class="font-semibold text-xl mb-1">Take the dog out</h2>
-                    <p class="text-neutral-200 text-sm">Go with Dona throught the park, take her to meet the other dogs and to mark teretories. Be carefull about the other more aggresive dogs</p>
-                    <button class="mt-3 px-4 py-1 border-2 border-red-600 text-red-600 transition-linear duration-300 hover:bg-red-600 hover:text-black hover:border-red-600">Delete</button>
-                </li>
-            <?php endif;?>
+                    <p class="text-md italic mb-1">21.3.2025</p>
+                </div>
+
+                <p class="text-neutral-200 text-sm">Go with Dona throught the park, take her to meet the other dogs and to mark teretories. Be carefull about the other more aggresive dogs</p>
+                <button class="mt-3 px-4 py-1 border-2 border-red-600 text-red-600 transition-linear duration-300 hover:bg-red-600 hover:text-black hover:border-red-600">Delete</button>
+            </li>
         </ul>
 
     </div>
 
 
-    
+    <script src="script.js"></script>
     
 </body>
 </html>
