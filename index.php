@@ -15,13 +15,15 @@ try {
         $body = trim($_POST["body"]);
         $due_date = $_POST["due_date"];
 
+        if(strlen($title) > 3 && strtotime($due_date) > time()){
+            $sql = "INSERT INTO todo_list (title, body, due_date) VALUES (:title, :body, :due_date)";
+            $statement = $conn->prepare($sql);
+            $statement->bindParam(':title', $title);
+            $statement->bindParam(':body', $body);
+            $statement->bindParam(':due_date', $due_date);
+            $statement->execute();
+        }
         
-        $sql = "INSERT INTO todo_list (title, body, due_date) VALUES (:title, :body, :due_date)";
-        $statement = $conn->prepare($sql);
-        $statement->bindParam(':title', $title);
-        $statement->bindParam(':body', $body);
-        $statement->bindParam(':due_date', $due_date);
-        $statement->execute();
     }
 
     
