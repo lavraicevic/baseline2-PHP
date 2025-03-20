@@ -13,9 +13,9 @@ try {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $title = trim($_POST["title"]);
         $body = trim($_POST["body"]);
-        $due_date = $_POST["due_date"];  // Ovdje je ispravljeno ime varijable
+        $due_date = $_POST["due_date"];
 
-        // Insert statement
+        
         $sql = "INSERT INTO todo_list (title, body, due_date) VALUES (:title, :body, :due_date)";
         $statement = $conn->prepare($sql);
         $statement->bindParam(':title', $title);
@@ -24,18 +24,28 @@ try {
         $statement->execute();
     }
 
-    // Fetch all todo list items
+    
     $sql = "SELECT * FROM todo_list ORDER BY id DESC";
     $statement = $conn->prepare($sql);
     $statement->execute();
     $todo_list = $statement->fetchAll(PDO::FETCH_ASSOC);
 
+    // Deleting a task
+    if (isset($_GET['delete_id'])) {
+
+        $delete_id = $_GET['delete_id'];
+        $sql = "DELETE FROM todo_list WHERE id = :id";
+        $stmt = $conn->prepare($sql);
+        $stmt->bindParam(':id', $delete_id, PDO::PARAM_INT);
+        $stmt->execute();
+        header("Location: index.php");
+        exit;
+    }
+
 } catch (PDOException $e) {
     echo "Error: " . $e->getMessage();
 }
-
 date_default_timezone_set('Europe/Belgrade');
-
 ?>
 
 <!DOCTYPE html>
@@ -44,9 +54,7 @@ date_default_timezone_set('Europe/Belgrade');
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Baseline check 2</title>
-
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
-
 </head>
 <body class="h-full bg-black">
 
@@ -63,15 +71,15 @@ date_default_timezone_set('Europe/Belgrade');
 
         <form method="POST" class="flex flex-col gap-2 w-[320px]" name="todoForm" onsubmit="return validateForm()">
             <label class="text-slate-200">Name: 
-                <input class="border-2 border-slate-200 rounded-lg pl-1" type="text" name="title">
+                <input class="border-2 border-slate-200 rounded-lg pl-1" type="text" name="title" required>
             </label>
 
             <label class="text-slate-200">Description: <br>
-                <textarea class="border-2 border-slate-200 rounded-lg w-full" name="body" rows="4" cols="40"></textarea>
+                <textarea class="border-2 border-slate-200 rounded-lg w-full" name="body" rows="4" cols="40" required></textarea>
             </label>
 
             <label class="text-slate-200">Due date: 
-                <input class="border-2 border-slate-200 rounded-lg pl-1" type="date" name="due_date">
+                <input class="border-2 border-slate-200 rounded-lg pl-1" type="date" name="due_date" required>
             </label>
 
             <input class="mt-2 border-2 border-slate-200 rounded-lg flex justify-center items-center text-zinc-200 w-30 transition-linear duration-300 hover:bg-zinc-200 hover:text-black" type="submit" value="Add to do">
@@ -87,19 +95,14 @@ date_default_timezone_set('Europe/Belgrade');
                     </div>
 
                     <p class="text-neutral-200 text-sm"><?= $item['body']; ?></p>
-                    <button class="mt-3 px-4 py-1 border-2 border-red-600 text-red-600 transition-linear duration-300 hover:bg-red-600 hover:text-black hover:border-red-600">Delete</button>
+
+                    <a href="?delete_id=<?= $item['id']; ?>" class="mt-3 px-4 py-1 border-2 border-red-600 text-red-600 transition-linear duration-300 hover:bg-red-600 hover:text-black hover:border-red-600">Delete</a>
                 </li>
             <?php endforeach; ?>
         </ul>
 
     </div>
-    
-    <script src="script.js"></script>
 
+    <script src="script.js"></script>
 </body>
 </html>
-
-
-
-
-
